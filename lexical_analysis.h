@@ -57,7 +57,7 @@ enum MyTokenType
     TOK_UNKNOWN         // Неизвестный символ (ошибка)
 };
 
-typedef struct
+struct Token
 {
     MyTokenType type;
     union
@@ -65,7 +65,7 @@ typedef struct
         double number;
         char* identifier;
     } value;
-}Token;
+};
 
 struct KeyWordToken
 {

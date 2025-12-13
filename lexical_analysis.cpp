@@ -50,7 +50,33 @@ static KeywordToken keyword_tokens[] =
     {TOK_UNKNOWN,       NULL}
 };
 
-static const char* skip_phrases[] = {
+char* ReadFile (const char* filename)
+{
+    FILE* file = fopen (filename, "r");
+    if (!file)
+    {
+        fprintf (stderr, "Cannot open file: %s\n", filename);
+        return NULL;
+    }
+
+    long size = GetFileSize (file);
+
+    char* buffer = (char*) calloc (size + 1, sizeof(char));
+    if (!buffer)
+    {
+        fclose (file);
+        return NULL;
+    }
+
+    fread (buffer, 1, size, file);
+    buffer[size] = '\0';
+    fclose (file);
+
+    return buffer;
+}
+
+static const char* skip_phrases[] =
+{
     "солдат_в_подчинение",
     "Солдат_в_подчинение",
     "по_приказу_вышепоставленных_органов",
@@ -67,44 +93,6 @@ static const char* skip_phrases[] = {
     "необходимо",
     NULL
 };
-
-int main()
-{
-    const char* test_program =
-        "Здравия_желаю_товарищ старшина Яйцов () {\n"
-        "    Товарищ старшина Хохлов Назначить 10 солдат_в_подчинение;\n"
-        "    Товарищ старшина Петушаров Назначить 20 солдат_в_подчинение;\n"
-        "    старшина Цыпочкин рапортую что по_приказу_вышепоставленных_органов необходимо Назначить Петушаров Включить_в_состав Хохлов;\n"
-        "    Приготовиться_к_исполнению_по_получении_приказа (что Цыпочкин превосходит_норму Хохлов) {\n"
-        "        Товарищ Цыпочкин Рапортую что по_приказу_вышепоставленных_органов необходимо расформировать_до Петушаров;\n"
-        "    }\n"
-        "вольно Цыпочкин;\n"
-        "}\n"
-        "Для_служебного_пользования Тестовый комментарий\n";
-
-    printf ("=== ТЕСТ ЛЕКСИЧЕСКОГО АНАЛИЗАТОРА (ООП стиль) ===\n\n");
-    printf ("Исходный код:\n");
-    printf ("-------------------------------------------------\n");
-    printf ("%s\n", test_program);
-    printf ("-------------------------------------------------\n\n");
-
-    Lexer* lexer = CtorLexer (test_program);
-    if (lexer && LexerScanTokens (lexer))
-    {
-        LexerPrintTokens (lexer);
-        DtorLexer (lexer);
-    }
-
-    int count = 0;
-    Token* old_tokens = LexerOld (test_program, &count);
-
-    if (old_tokens)
-    {
-        printf ("Упрощенный интерфейс вернул %d токенов\n", count);
-        FreeTokens (old_tokens, count);
-    }
-
-}
 
 MyTokenType FindTokenByString (const char* str)
 {
@@ -287,7 +275,7 @@ bool ScanSymbol (Lexer* lexer)
     return true;
 }
 
-Lexer* CtorLexer(const char* source_code)
+Lexer* CtorLexer (const char* source_code)
 {
     Lexer* lexer = (Lexer*) calloc (1, sizeof (Lexer));
     if (!lexer) return NULL;
@@ -310,7 +298,7 @@ Lexer* CtorLexer(const char* source_code)
     return lexer;
 }
 
-void DtorLexer(Lexer* lexer)
+void DtorLexer (Lexer* lexer)
 {
     if (!lexer) return;
 
@@ -390,7 +378,7 @@ bool LexerScanTokens (Lexer* lexer)
     return AddToken (lexer, TOK_EOF, "", 0);
 }
 
-static bool IsRussianLetter(char c)
+static bool IsRussianLetter (char c)
 {
     unsigned char uc = (unsigned char) c;
 
@@ -486,9 +474,9 @@ void LexerPrintTokens (const Lexer* lexer)
 
             case TOK_IDENTIFIER:
                 if (token->value.identifier)
-                    printf("%-20s", token->value.identifier);
+                    printf ("%-20s", token->value.identifier);
                 else
-                    printf("%-20s", "(null)");
+                    printf ("%-20s", "(null)");
 
                 break;
 
@@ -544,51 +532,3 @@ void FreeTokens (Token* tokens, int token_count)
     }
     free (tokens);
 }
-
-// ==================== ЧАСТЬ 14: ЗАГОЛОВОЧНЫЙ ФАЙЛ (lexer.h) ====================
-/*
-#ifndef LEXER_H
-#define LEXER_H
-
-#include <stdbool.h>
-
-typedef enum {
-    TOK_DECLARE, TOK_TYPE_INT, TOK_TYPE_CHAR, TOK_TYPE_DOUBLE,
-    TOK_IF, TOK_RETURN,
-    TOK_PLUS, TOK_MINUS, TOK_MULTIPLY, TOK_DIVIDE,
-    TOK_EQ, TOK_NE, TOK_GT, TOK_LT,
-    TOK_ASSIGN, TOK_IDENTIFIER, TOK_NUMBER,
-    TOK_SEMICOLON, TOK_LPAREN, TOK_RPAREN,
-    TOK_LBRACE, TOK_RBRACE, TOK_COMMA,
-    TOK_COMMENT, TOK_EOF, TOK_UNKNOWN
-} MyTokenType;
-
-typedef struct {
-    MyTokenType type;
-    union {
-        double number;
-        char* identifier;
-    } value;
-} Token;
-
-typedef struct Lexer Lexer;
-
-// Основные функции для работы с лексером
-Lexer* CtorLexer(const char* source_code);
-void DtorLexer(Lexer* lexer);
-bool LexerScanTokens(Lexer* lexer);
-
-// Геттеры
-Token* LexerGetTokens(const Lexer* lexer);
-int LexerGetTokenCount(const Lexer* lexer);
-
-// Функции для отладки
-const char* token_type_to_string(MyTokenType type);
-void LexerPrintTokens(const Lexer* lexer);
-
-// Старый интерфейс для совместимости
-Token* lexer(const char* source_code, int* token_count);
-void FreeTokens(Token* tokens, int token_count);
-
-#endif // LEXER_H
-*/
