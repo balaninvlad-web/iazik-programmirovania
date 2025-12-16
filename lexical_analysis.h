@@ -96,7 +96,8 @@ bool AddToken (Lexer* lexer, MyTokenType type, const char* value_start, int valu
 bool ScanNumber (Lexer* lexer);
 bool ScanIdentifier (Lexer* lexer);
 bool ScanSymbol (Lexer* lexer);
-
+char* ReadFile (const char* filename);
+long GetFileSize (FILE* file);
 
 Lexer* CtorLexer (const char* source_code);
 void DtorLexer (Lexer* lexer);

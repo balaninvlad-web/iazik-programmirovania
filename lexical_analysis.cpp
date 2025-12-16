@@ -75,6 +75,17 @@ char* ReadFile (const char* filename)
     return buffer;
 }
 
+long GetFileSize (FILE* file)
+{
+    if (!file) return -1;
+
+    fseek(file, 0, SEEK_END);
+    long size = ftell(file);
+    fseek(file, 0, SEEK_SET);
+
+    return size;
+}
+
 static const char* skip_phrases[] =
 {
     "солдат_в_подчинение",
