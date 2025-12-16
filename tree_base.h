@@ -31,6 +31,7 @@ enum  NodeType
 
     // ”правление
     NODE_IF,            // if
+    NODE_WHILE,         // while
     NODE_RETURN,        // return (вольно)
 
     // “ипы

@@ -270,7 +270,7 @@ const char* NodeTypeToString (NodeType type)
      {
         case 0:  return "NODE_EMPTY";
         case 1:  return "NODE_SEQUENCE";
-        case 2:  return "NODE_NUMBER";      // <-- ВОТ ОН!
+        case 2:  return "NODE_NUMBER";
         case 3:  return "NODE_VARIABLE";
         case 4:  return "NODE_ADD";
         case 5:  return "NODE_SUB";
@@ -381,50 +381,41 @@ static const char* TransliterateChar(unsigned char c)
     return translit[c];
 }
 
-void SafePrintString(FILE* dot_file, const char* str) {
-    if (!str) {
+void SafePrintString(FILE* dot_file, const char* str)
+{
+    if (!str)
+    {
         fprintf(dot_file, "(null)");
         return;
     }
 
-    // ДОБАВИМ ОТЛАДКУ
-    printf("\nDEBUG SafePrintString: ");
-    for (int i = 0; str[i] != '\0'; i++) {
-        printf("0x%02X '%c'  ", (unsigned char)str[i],
-               (str[i] >= 32 && str[i] <= 126) ? str[i] : '.');
-    }
-    printf("\n");
-
-    for (int i = 0; str[i] != '\0'; i++) {
+    for (int i = 0; str[i] != '\0'; i++)
+    {
         unsigned char c = str[i];
 
-        // Печатаемые ASCII символы (32-126)
-        if (c >= 32 && c <= 126) {
-            switch (c) {
-                case '<': fprintf(dot_file, "&lt;"); break;
-                case '>': fprintf(dot_file, "&gt;"); break;
-                case '&': fprintf(dot_file, "&amp;"); break;
-                case '"': fprintf(dot_file, "&quot;"); break;
-                case '\'': fprintf(dot_file, "&#39;"); break;
-                default: fputc(c, dot_file); break;
+        if (c >= 32 && c <= 126)
+        {
+            switch (c)
+            {
+                case '<': fprintf (dot_file, "&lt;"); break;
+                case '>': fprintf (dot_file, "&gt;"); break;
+                case '&': fprintf (dot_file, "&amp;"); break;
+                case '"': fprintf (dot_file, "&quot;"); break;
+                case '\'': fprintf (dot_file, "&#39;"); break;
+                default: fputc (c, dot_file); break;
             }
         }
-        // Русские буквы CP1251
         else if ((c >= 0xC0 && c <= 0xDF) ||  // А-Я (кроме Ё)
                  (c >= 0xE0 && c <= 0xFF) ||  // а-я (кроме ё)
-                 c == 0xA8 || c == 0xB8) {    // Ё и ё
-            const char* translit = TransliterateChar(c);
-            if (translit) {
-                fprintf(dot_file, "%s", translit);
-                printf("0x%02X -> %s  ", c, translit); // ОТЛАДКА
-            } else {
-                fprintf(dot_file, "?");
+                 c == 0xA8 || c == 0xB8)
+        {
+            const char* translit = TransliterateChar (c);
+            if (translit)
+            {
+                fprintf (dot_file, "%s", translit);
             }
-        }
-        // ВСЕ остальные символы - ПРОПУСКАЕМ
-        else {
-            printf("[SKIP 0x%02X] ", c); // ОТЛАДКА
+            else
+                fprintf (dot_file, "?");
         }
     }
-    printf("\n");
 }

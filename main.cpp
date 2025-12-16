@@ -2,6 +2,7 @@
 #include "tree_base.h"
 #include "syntactic_analysis.h"
 #include "create_AST_dump.h"
+#include "create_tree_AST.h"
 
 int main(int argc, char* argv[])
 {
@@ -51,23 +52,31 @@ int main(int argc, char* argv[])
         printf("\n=== АБСТРАКТНОЕ СИНТАКСИЧЕСКОЕ ДЕРЕВО ===\n");
         PrintTree(Ast_root, 0);
 
-        FreeTree (Ast_root);
-
         CreateGraphvizDump (Ast_root, "ast_graph.dot");
-
-        CreateHtmlDump (Ast_root, "main", "Парсинг завершен успешно");
-
-        FreeTree (Ast_root);
     }
     else
     {
         printf ("\nПарсер вернул NULL без ошибок\n");
     }
 
+    if (Ast_root)
+    {
+        DumpAST (Ast_root, stdout);
+        FILE* Dump = fopen ("ast_tree.txt", "w");
+        if (Dump)
+        {
+            DumpAST (Ast_root, Dump);
+            fclose (Dump);
+        }
+        else
+            printf ("\nФайл ast_tree.txt не создан\n");
+    }
+
+    FreeTree (Ast_root);
     CloseHtmlFile ();
     DtorGetter (Getter);
     DtorLexer (lexer);
-    printf ("\nПрограмма завершена успешно\n");
+    printf ("\nГенерация завершена\n");
 }
 
 /*
