@@ -3,11 +3,14 @@
 #include "syntactic_analysis.h"
 #include "create_AST_dump.h"
 #include "create_tree_AST.h"
+#include "read_AST_tree.h"
+#include <stdio.h>
+#include <stdlib.h>
 
-int main(int argc, char* argv[])
+int main (int argc, char* argv[])
 {
     char* test_program = NULL;
-
+    char* Lisp_code = NULL;
     if (argc  > 1)
     {
         char* filename = argv[1];
@@ -72,6 +75,21 @@ int main(int argc, char* argv[])
             printf ("\nÔאיכ ast_tree.txt םו סמחהאם\n");
     }
 
+    printf("Parsing LISP Ast_tree_after_reading...\n");
+
+    Lisp_code = ReadFile ("ast_tree.txt");
+    Node* Ast_tree_after_reading = ParseLispAST (Lisp_code);
+
+    if (Ast_tree_after_reading)
+    {
+        printf ("\n=== Successfully parsed! ===\n");
+        printf ("\nAST Structure:\n");
+        PrintTree (Ast_tree_after_reading, 0);
+    } else
+        printf("Parsing failed\n");
+
+
+    FreeTree(Ast_tree_after_reading);
     FreeTree (Ast_root);
     CloseHtmlFile ();
     DtorGetter (Getter);
