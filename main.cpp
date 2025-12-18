@@ -4,6 +4,7 @@
 #include "create_AST_dump.h"
 #include "create_tree_AST.h"
 #include "read_AST_tree.h"
+#include "create_asm_code_from_tree.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -75,21 +76,41 @@ int main (int argc, char* argv[])
             printf ("\nФайл ast_tree.txt не создан\n");
     }
 
-    printf("Parsing LISP Ast_tree_after_reading...\n");
+    printf ("Parsing LISP Ast_tree_after_reading...\n");
 
     Lisp_code = ReadFile ("ast_tree.txt");
     Node* Ast_tree_after_reading = ParseLispAST (Lisp_code);
 
     if (Ast_tree_after_reading)
     {
-        printf ("\n=== Successfully parsed! ===\n");
-        printf ("\nAST Structure:\n");
+        printf ("\nAST Structure after reading:\n");
         PrintTree (Ast_tree_after_reading, 0);
     } else
         printf("Parsing failed\n");
 
+    FILE* Asm_code = fopen ("asm_code_gen.asm", "w");
+    CodeGenContext* codegen = CtorCodeGen (Asm_code);
+    if (codegen && Ast_root)
+    {
+        int has_function = 0;
+        Node* current = Ast_root;
 
-    FreeTree(Ast_tree_after_reading);
+        if (Ast_root->type == NODE_FUNC_DECL)
+        {
+            has_function = 1;
+            fprintf (Asm_code, "; Точка входа программы\n");
+            fprintf (Asm_code, "CALL :func_0\n");
+            fprintf (Asm_code, "OUT\n");
+            fprintf (Asm_code, "HLT\n");
+        }
+        GenerateCode (codegen, Ast_root);
+
+        if (!has_function)
+            fprintf (Asm_code, "HLT\n");
+    }
+
+    DtorCodeGen (codegen);
+    FreeTree (Ast_tree_after_reading);
     FreeTree (Ast_root);
     CloseHtmlFile ();
     DtorGetter (Getter);

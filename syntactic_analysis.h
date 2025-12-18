@@ -22,6 +22,7 @@ Node* GetStatements (Getter* getter);
 Node* GetStatement (Getter* getter);
 Node* GetVarDecl (Getter* getter);
 Node* GetAssignment (Getter* getter);
+Node* GetWhile (Getter* getter);
 Node* GetIf (Getter* getter);
 Node* GetReturn (Getter* getter);
 Node* GetExpression (Getter* getter);

@@ -144,7 +144,7 @@ Node* GetFactor (Getter* getter) // */
 
     while (1)
     {
-        Token* token = CurrentToken(getter);
+        Token* token = CurrentToken (getter);
         if (!token) break;
 
         NodeType op_type = NODE_EMPTY;
@@ -170,7 +170,7 @@ Node* GetTerm (Getter* getter) // +-
 
     while (1)
     {
-        Token* token = CurrentToken(getter);
+        Token* token = CurrentToken (getter);
         if (!token) break;
 
         NodeType op_type = NODE_EMPTY;
@@ -189,13 +189,13 @@ Node* GetTerm (Getter* getter) // +-
     return node;
 }
 
-Node* GetComparison(Getter* getter)//  —равнени€ (==, !=, >, <)
+Node* GetComparison (Getter* getter)//  —равнени€ (==, !=, >, <)
 {
     Node* node = GetTerm (getter);
 
     while (1)
     {
-        Token* token = CurrentToken(getter);
+        Token* token = CurrentToken (getter);
         if (!token) break;
 
         NodeType op_type = NODE_EMPTY;
@@ -301,6 +301,20 @@ Node* GetReturn (Getter* getter)
     return CreateReturn (expr);
 }
 
+Node* GetWhile (Getter* getter)
+{
+    Expect (getter, TOK_WHILE, "ќжидалось 'while'");
+    Expect (getter, TOK_LPAREN, "ќжидалось '(' после while");
+
+    Node* condition = GetExpression (getter);
+
+    Expect (getter, TOK_RPAREN, "ќжидалось ')' после услови€ while");
+
+    Node* body = GetStatement (getter);
+
+    return CreateOperation (NODE_WHILE, condition, body);
+}
+
 Node* GetIf (Getter* getter)
 {
     Expect (getter, TOK_IF, "ќжидалось 'if'");
@@ -312,11 +326,11 @@ Node* GetIf (Getter* getter)
 
     Node* body = GetStatement (getter);
 
-    return CreateIf (condition, body);
+    return CreateOperation (NODE_IF, condition, body);
 }
 
 
-Node* GetBlock(Getter* getter) // Ѕлок { }
+Node* GetBlock (Getter* getter) // Ѕлок { }
 {
     Expect (getter, TOK_LBRACE, "ќжидалось '{'");
 
@@ -358,7 +372,8 @@ Node* GetStatement (Getter* getter) // один оператор
 
         case TOK_IF:
             return GetIf (getter);
-
+        case TOK_WHILE:
+            return GetWhile (getter);
         case TOK_RETURN:
             return GetReturn (getter);
 
@@ -433,7 +448,7 @@ Node* GetFunction (Getter* getter)
         return NULL;
 
     Token* type_token = CurrentToken (getter);
-    NodeType return_type;
+    NodeType return_type = {};
 
     switch (type_token->type)
     {
@@ -455,12 +470,18 @@ Node* GetFunction (Getter* getter)
     char* func_name = strdup(id_token->value.identifier);
 
     if (!Expect(getter, TOK_LPAREN, "ќжидалось '(' после имени функции"))
+    {
+        free(func_name);
         return NULL;
+    }
 
-    //TODO передавать аргументы
+    Node* params = NULL;  // TODO: параметры
 
     if (!Expect(getter, TOK_RPAREN, "ќжидалось ')' после параметров"))
+    {
+        free(func_name);
         return NULL;
+    }
 
     Node* body = GetBlock(getter);
     if (!body)
@@ -470,7 +491,7 @@ Node* GetFunction (Getter* getter)
     }
 
     Node* func_decl = CreateFunctionDeclaration(return_type, func_name, NULL, body);
-    free(func_name);
+    free (func_name);
 
     return func_decl;
 }

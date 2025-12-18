@@ -4,40 +4,30 @@
 #include <stddef.h>
 #include <stdbool.h>
 
-enum  NodeType
+enum NodeType
 {
     NODE_EMPTY,         // Пустой узел
     NODE_SEQUENCE,      // Последовательность (;)
-
-    // Литералы
-    NODE_NUMBER,        // Число: 10
-    NODE_VARIABLE,      // Переменная: Хохлов
-
-    // Операции
-    NODE_ADD,           // + (Включить_в_состав)
-    NODE_SUB,           // - (Исключить_из_состава)
-    NODE_MUL,           // * (усилить)
-    NODE_DIV,           // / (расформировать_до)
-    NODE_EQ,            // == (соответствует)
-    NODE_NE,            // != (не соответствует)
-    NODE_GT,            // > (превосходит_норму)
-    NODE_LT,            // < (не превосходит_норму)
-    NODE_ASSIGNMENT,    // = (Назначить)
-
-    // Объявления
-    NODE_VAR_DECL,      // Объявление переменной: старшина Хохлов
+    NODE_NUMBER,        // Число
+    NODE_VARIABLE,      // Переменная
+    NODE_ADD,           // +
+    NODE_SUB,           // -
+    NODE_MUL,           // *
+    NODE_DIV,           // /
+    NODE_EQ,            // ==
+    NODE_NE,            // !=
+    NODE_GT,            // >
+    NODE_LT,            // <
+    NODE_ASSIGNMENT,    // =
+    NODE_VAR_DECL,      // Объявление переменной
     NODE_FUNC_DECL,     // Объявление функции
     NODE_FUNC_CALL,     // Вызов функции
-
-    // Управление
     NODE_IF,            // if
     NODE_WHILE,         // while
-    NODE_RETURN,        // return (вольно)
-
-    // Типы
-    NODE_TYPE_INT,      // старшина
-    NODE_TYPE_CHAR,     // рядовой
-    NODE_TYPE_DOUBLE    // прапорщик
+    NODE_RETURN,        // return
+    NODE_TYPE_INT,      // int
+    NODE_TYPE_CHAR,     // char
+    NODE_TYPE_DOUBLE    // double
 };
 
 struct NodeData
