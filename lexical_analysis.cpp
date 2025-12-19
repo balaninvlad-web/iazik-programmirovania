@@ -33,7 +33,7 @@ static KeywordToken keyword_tokens[] =
     {TOK_TYPE_DOUBLE,   "прапорщик"},
 
     {TOK_IF,            "Приготовиться_к_исполнению_по_получении_приказа"},
-    {TOK_WHILE,         "Исполнять_пока_получите_приказа"},
+    {TOK_WHILE,         "Исполнять_пока_не_получите_приказа"},
     {TOK_RETURN,        "вольно"},
 
     {TOK_PLUS,          "Включить_в_состав"},
@@ -104,6 +104,10 @@ static const char* skip_phrases[] =
     "доложил",
     "что",
     "необходимо",
+    "вас",
+    "Вас",
+    "Всех_солдат_что_у",
+    "всех_солдат_что_у",
     NULL
 };
 
@@ -382,10 +386,87 @@ bool LexerScanTokens (Lexer* lexer)
 
         if (ScanSymbol (lexer))
             continue;
+        #ifdef DEBUG
+            printf("DEBUG: Неизвестный символ: '%c' (код: %d), line: %d, col: %d\n",
+                Peek(lexer), (unsigned char)Peek(lexer), lexer->line, lexer->column);
+            printf("DEBUG: Контекст: '%.10s'\n", lexer->current);
+        #endif
 
         fprintf (stderr, "Ошибка лексического анализа (строка %d, столбец %d): неизвестный символ '%c' (код: %d)\n",
                  lexer->line, lexer->column, Peek(lexer), (unsigned char)Peek(lexer));
         Advance (lexer);
+
+        #ifdef DEBUG
+        if (!ScanSymbol (lexer))
+        {
+            printf ("DEBUG UNKNOWN CHAR: '%c' (ASCII: %d, hex: 0x%02x) at line %d, col %d\n",
+                   Peek(lexer),
+                   (unsigned char)Peek(lexer),
+                   (unsigned char)Peek(lexer),
+                   lexer->line, lexer->column);
+
+            fprintf (stderr, "Ошибка лексического анализа (строка %d, столбец %d): неизвестный символ '%c' (код: %d)\n",
+                    lexer->line, lexer->column, Peek(lexer), (unsigned char)Peek(lexer));
+            Advance (lexer);
+            continue;
+        }
+
+        char c = Peek(lexer);
+        printf("\n=== DEBUG UNKNOWN CHARACTER DETECTED ===\n");
+        printf("Позиция: строка %d, столбец %d\n", lexer->line, lexer->column);
+        printf("Символ: '%c'\n", c);
+        printf("ASCII код: %d\n", (unsigned char)c);
+        printf("Hex: 0x%02x\n", (unsigned char)c);
+
+        // Показать контекст
+        printf("Контекст (20 символов): '");
+        const char* context = lexer->current;
+        for (int i = 0; i < 20 && context[i] != '\0'; i++) {
+            if (context[i] == '\n') printf("\\n");
+            else if (context[i] == '\r') printf("\\r");
+            else if (context[i] == '\t') printf("\\t");
+            else printf("%c", context[i]);
+        }
+        printf("'\n");
+
+        // Показать предыдущие и следующие токены
+        printf("Текущий индекс токенов: %d\n", lexer->count);
+        if (lexer->count > 0) {
+            printf("Предыдущий токен: ");
+            Token* prev = &lexer->tokens[lexer->count - 1];
+            printf("Тип: %s, ", TokenTypeToString(prev->type));
+            if (prev->type == TOK_IDENTIFIER && prev->value.identifier)
+                printf("Значение: '%s'\n", prev->value.identifier);
+            else if (prev->type == TOK_NUMBER)
+                printf("Значение: %g\n", prev->value.number);
+            else
+                printf("\n");
+        }
+        printf("=== END DEBUG ===\n\n");
+        // === КОНЕЦ ДОБАВЛЕННОГО КОДА ===
+
+        printf("=== DEBUG UNKNOWN CHAR ===\n");
+        printf("Символ: '%c'\n", Peek(lexer));
+        printf("ASCII код: %d\n", (unsigned char)Peek(lexer));
+        printf("Hex: 0x%02x\n", (unsigned char)Peek(lexer));
+        printf("Позиция: строка %d, столбец %d\n", lexer->line, lexer->column);
+
+        printf("Контекст: '");
+        for (int i = 0; i < 20 && lexer->current[i] != '\0'; i++)
+        {
+            if (lexer->current[i] == '\n') printf("\\n");
+            else if (lexer->current[i] == '\r') printf("\\r");
+            else if (lexer->current[i] == '\t') printf("\\t");
+            else printf("%c", lexer->current[i]);
+        }
+        printf("'\n");
+        printf("=== КОНЕЦ DEBUG ===\n");
+
+        fprintf (stderr, "Ошибка лексического анализа (строка %d, столбец %d): неизвестный символ '%c' (код: %d)\n",
+                 lexer->line, lexer->column, Peek(lexer), (unsigned char)Peek(lexer));
+        Advance (lexer);
+
+        #endif
     }
 
     return AddToken (lexer, TOK_EOF, "", 0);

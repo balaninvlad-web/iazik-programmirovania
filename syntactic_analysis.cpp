@@ -356,6 +356,7 @@ Node* GetStatement (Getter* getter) // один оператор
         printf("DEBUG GetStatement: токен %d: %s",
                getter->current_token,
                TokenTypeToString (token ? token->type : TOK_EOF));
+
         if (token && token->type == TOK_IDENTIFIER)
             printf (" ('%s')", token->value.identifier);
         else if (token && token->type == TOK_NUMBER)
